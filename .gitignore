@@ -1,0 +1,13 @@
+# Vagrant folders #
+###################
+.vagrant
+
+# OSX garbage
+.DS_Store
+
+# golem configuration
+vm-config.json
+
+*.log
+/log/*
+/tmp/*
