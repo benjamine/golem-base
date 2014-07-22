@@ -29,14 +29,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # using a specific IP.
   # config.vm.network :private_network, ip: "192.168.33.10"
 
-  # load forwarded ports file
-  if (File.exists? './forwarded_ports')
-    File.open('./forwarded_ports').each do |line|
-      guest_port, host_port = line.match(/^ (.*) => (.*)$/).captures
-      config.vm.network :forwarded_port, guest: guest_port, host: host_port
-    end
-  end
-
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
@@ -52,16 +44,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-  # load synced folders file
-  if (File.exists? './synced_folders')
-    File.open('./synced_folders').each do |line|
-      host_dir, guest_dir = line.match(/^ (.*) => (.*)$/).captures
-      if is_windows and line.match(/\/[A-Za-z]\//)
-        # convert to windows path
-        host_dir = host_dir[1..-1].sub("/", ":\\").gsub("/", "\\")
+  if (File.exists? './vm-config.json')
+    require 'json'
+    cfg = JSON.parse(IO.read('./vm-config.json'))
+
+    if cfg.key?('folders')
+      cfg['folders'].each do | host_dir, guest_dir |
+        if is_windows and hostDir.match(/\/[A-Za-z]\//)
+          # convert to windows path
+          host_dir = host_dir[1..-1].sub("/", ":\\").gsub("/", "\\")
+        end
+        config.vm.synced_folder host_dir, guest_dir
       end
-      config.vm.synced_folder host_dir, guest_dir
     end
+
+    if cfg.key?('portForwarding')
+      cfg['portForwarding'].each do | guest_port, host_port |
+        config.vm.network :forwarded_port, guest: guest_port, host: host_port
+      end
+    end
+
   end
 
   # Provider-specific configuration so you can fine-tune various
