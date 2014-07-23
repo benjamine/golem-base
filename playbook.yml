@@ -1,0 +1,25 @@
+# Ansible playbook for a Golem machine.
+#
+# If this is being used within a Vagrant profile, you can update your server
+# by running `vagrant provision` again.
+#
+# @author Benjamin Eidelman (2014).
+#
+# @see http://www.ansibleworks.com/docs/bestpractices.html
+
+- hosts: all
+  tasks:
+
+    - name: golem banner as motd
+      copy: src=./resources/banner.txt dest=/etc/motd
+
+    - name: install dos2unix
+      apt: name=dos2unix state=latest
+
+    - name: install docker
+      script: ./scripts/docker.sh creates=/usr/bin/docker
+
+    - name: install zsh and oh-my-zsh
+      script: ./scripts/zsh.sh
+      sudo: yes
+      sudo_user: vagrant

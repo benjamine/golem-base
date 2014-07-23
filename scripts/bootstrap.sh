@@ -26,27 +26,3 @@ then
     echo 'setting GOLEM="true"'
     echo 'GOLEM="true"' >> /etc/environment
 fi
-
-if ! grep -q LC_INITIALDIR /home/vagrant/.bashrc
-then
-    echo 'setting cd initial dir at .bashrc'
-    echo '# Take ssh initial dir from client var' >> .bashrc
-    echo 'export INITIALDIR=$LC_INITIALDIR' >> .bashrc
-    echo 'if [ -n $INITIALDIR ]; then cd $INITIALDIR;fi' >> .bashrc
-fi
-
-if [ -f /home/vagrant/.zshrc ]; then
-  if ! grep -q "golem $PROMPT" /home/vagrant/.zshrc
-  then
-    echo 'setting golem prompt at .zshrc'
-    echo '# identify as golem in prompt' >> .zshrc
-    echo 'export PROMPT="golem $PROMPT"' >> .zshrc
-  fi
-  if ! grep -q LC_INITIALDIR /home/vagrant/.zshrc
-  then
-    echo 'setting cd initial dir at .zshrc'
-    echo '# Take ssh initial dir from client var' >> .zshrc
-    echo 'export INITIALDIR=$LC_INITIALDIR' >> .zshrc
-    echo 'if [ -n $INITIALDIR ]; then cd "${INITIALDIR#* }";fi' >> .zshrc
-  fi
-fi

@@ -44,6 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
+  # load dynamic configuration from vm-config file
   if (File.exists? './vm-config.json')
     require 'json'
     cfg = JSON.parse(IO.read('./vm-config.json'))
@@ -68,35 +69,43 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider :virtualbox do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-  #   # Use VBoxManage to customize the VM. For example to change memory:
-  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
-  # end
   #
   # View the documentation for the provider you're using for more
   # information on available options.
 
   config.vm.provider :virtualbox do |vb|
+#   # Don't boot with headless mode
+#   vb.gui = true
+
     # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.memory = 2048
+
+    host_cpus = 2
+    begin
+      if is_windows
+        require 'win32ole'
+        host_cpus = WIN32OLE.connect("winmgmts://").ExecQuery("select * from Win32_ComputerSystem").NumberOfProcessors
+      else
+        if File.exist? '/proc/cpuinfo'
+          host_cpus = File.read('/proc/cpuinfo').scan(/^processor\s*:/).size
+        else
+          host_cpus = `sysctl -n hw.logicalcpu`.chomp.to_i
+        end
+      end
+    rescue
+      host_cpus = 2
+    end
+    vb.cpus = host_cpus
   end
 
   # Start provisioning with shell script
-  config.vm.provision :shell, :path => "scripts/bootstrap.sh"
+  #config.vm.provision :shell, :path => "scripts/bootstrap.sh"
 
-  # Enable provisioning with Puppet stand alone.  Puppet manifests
-  # are contained in a directory path relative to this Vagrantfile.
-  # You will need to create the manifests directory and a manifest in
-  # the file precise32.pp in the manifests_path directory.
-  #
-  config.vm.provision :puppet do |puppet|
-    puppet.manifests_path = "manifests"
-    puppet.manifest_file  = "init.pp"
+  # Provisioning configuration for Ansible.
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
+    # Run commands as root.
+    ansible.sudo = true
+    # ansible.raw_arguments = ['-v']
   end
-
 end
