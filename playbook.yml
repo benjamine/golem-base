@@ -19,6 +19,9 @@
     - name: install docker
       script: ./scripts/docker.sh creates=/usr/bin/docker
 
+    - name: install gaudi
+      script: ./scripts/gaudi.sh creates=/usr/bin/gaudi
+
     - name: install zsh and oh-my-zsh
       script: ./scripts/zsh.sh
       sudo: yes
