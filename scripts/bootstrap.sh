@@ -1,3 +1,5 @@
+#!/bin/sh
+set -e
 
 # nasty fix for "stdin: is not a tty" false error msg
 sed -i 's/^mesg n$/tty -s \&\& mesg n/g' /root/.profile
@@ -5,7 +7,7 @@ sed -i 's/^mesg n$/tty -s \&\& mesg n/g' /root/.profile
 aptgetupdate=true
 if [ -f /var/cache/apt.lastday ]; then
     if [ `date +%Y-%m-%d` = `cat /var/cache/apt.lastday` ]; then
-        echo 'apt-get already updated today'
+        # apt-get already updated today
         aptgetupdate=false
     fi
 fi

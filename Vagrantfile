@@ -98,14 +98,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.cpus = host_cpus
   end
 
-  # Start provisioning with shell script
-  #config.vm.provision :shell, :path => "scripts/bootstrap.sh"
+  # provision with shell script
+  config.vm.provision :shell, :path => "scripts/provision.sh"
 
-  # Provisioning configuration for Ansible.
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "playbook.yml"
-    # Run commands as root.
-    ansible.sudo = true
-    # ansible.raw_arguments = ['-v']
-  end
 end
